@@ -124,7 +124,7 @@ public class UserLinked {
    */
   public void view(int id){
     UserNode cur = head;
-    for(int i=0;i<size;i++){
+    for(int i=0;i<=size;i++){
       if(cur.userName==id){
         System.out.println("用户名："+cur.userName+","+"密码："+cur.password+","+"联系方式："+cur.phone);
         break;

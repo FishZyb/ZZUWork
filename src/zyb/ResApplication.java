@@ -274,7 +274,6 @@ public class ResApplication {
         break;
       }
     }
-    menuUserMessage(userName);
   }
 
   /**
