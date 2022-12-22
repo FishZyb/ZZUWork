@@ -66,10 +66,37 @@ public class OrderLinked {
      OrderNode cur = head;
      for(int i=0;i<size;i++){
        if(cur.userId==id&&cur.shopName.equals(shopName)){
-         System.out.println("用户在该餐馆预约的时间为："+cur.time);
+         System.out.println("用户"+id+"在该餐馆预约的时间为："+cur.time);
        }
        cur = cur.next;
      }
+  }
+
+  /**
+   * 在order表中新添加一条预约信息
+   * @param id
+   * @param shopName
+   * @param time
+   */
+  public void addUserReserveMes(int id,String shopName,String time){
+    addAtIndex(0,id,shopName,time);
+  }
+
+  /**
+   * 根据商户名查询该商户所有的预定信息
+   * @param shopName
+   */
+  public void viewMesByName(String shopName){
+    OrderNode cur = head;
+    for(int i=0;i<size;i++){
+      cur = cur.next;
+      if(cur.shopName.equals(shopName)){
+        System.out.println("用户名："+cur.userId+"在"+cur.time+"预定了该餐馆");
+      }
+      if(i == size-1){
+        System.out.println("该餐馆没有被预定!");
+      }
+    }
   }
 
 

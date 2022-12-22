@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -67,6 +68,7 @@ public class ResApplication {
     System.out.println("----------------用户系统----------------");
     System.out.println("\t\t\t\t登录（1）");
     System.out.println("\t\t\t\t注册（2）");
+    System.out.println("\t\t\t\t返回（0）");
     System.out.println("请输入您的选择：");
     int choice = inInt();
     if(choice==1){
@@ -79,14 +81,18 @@ public class ResApplication {
       if(isUser){
         //将餐馆的预定信息也保存在链表中
         saveOrderData();
-
         System.out.println("----------------欢迎登录用户管理系统----------------");
         System.out.println("\t\t\t\t个人信息管理(1)");
         System.out.println("\t\t\t\t餐馆查询(2)");
         System.out.println("\t\t\t\t餐馆预定(3)");
+        System.out.println("\t\t\t\t返回(0)");
 //        System.out.println("\t\t\t\t餐馆推荐(4)");
+        System.out.println("请输入您的选择：");
         int userChoice = inInt();
         switch (userChoice){
+          case 0:
+            menuUser();
+            break;
           case 1:
             menuUserMessage(userName);
             break;
@@ -103,11 +109,13 @@ public class ResApplication {
       }else{
         System.out.println("账号或密码输入错误，请重新登录");
       }
-    }else{
+    }else if(choice==2){
       System.out.println("请输入注册账号：");
       int userNameApply = inInt();
       System.out.println("请输入您的密码：");
       int passwordApply = inInt();
+    }else if(choice==0){
+      menuSystem();
     }
 
   }
@@ -157,9 +165,13 @@ public class ResApplication {
     System.out.println("\t\t\t\t查看个人信息(1)");
     System.out.println("\t\t\t\t修改个人信息(2)");
     System.out.println("\t\t\t\t注销个人信息(3)");
+    System.out.println("\t\t\t\t返回(0)");
     System.out.println("请输入您的选择：");
     int choice = inInt();
     switch (choice){
+      case 0:
+        menuUser();
+        break;
       case 1:
         viewUserMes(userName);
         break;
@@ -247,7 +259,7 @@ public class ResApplication {
    * 将餐馆的名称作为查找的关键字，利用哈希表查找算法来实现，如果该餐馆存在，则返回餐馆的基本信息
    * 以及用户到该餐馆的最短距离（用户的地址为郑州轻工业大学）。
    */
-  public static void UserResFid(int userName){
+  public void UserResFid(int userName){
     System.out.println("请输入您想要查找的餐馆名称：");
     String shopName = inString();
     //拿到所有的餐馆的所有信息
@@ -258,11 +270,11 @@ public class ResApplication {
       if(shopName.equals(shop.getShopName())){
         System.out.println(shop);
         //以及用户所在地郑州轻工业大学到该餐馆的距离
-
+        System.out.println("未查询到郑州轻工业大学和该餐馆之间的距离！");
         break;
       }
     }
-
+    menuUserMessage(userName);
   }
 
   /**
@@ -273,8 +285,12 @@ public class ResApplication {
     System.out.println("\t\t\t\t查询某餐馆的预定(2)");
     System.out.println("\t\t\t\t添加预定(3)");
     System.out.println("\t\t\t\t餐馆推荐(4)");
+    System.out.println("\t\t\t\t返回(0)");
     int choice = inInt();
     switch (choice){
+      case 0:
+        menuUser();
+        break;
       case 1:
         findUserReserve(id);
         break;
@@ -339,9 +355,38 @@ public class ResApplication {
   /**
    * 输入餐馆的名称，如果餐馆在shop文件中存在，那么增加一条新的预定信息到order表中。
    */
-  public static void addReserve(int id){
+  public void addReserve(int id){
     System.out.println("请输入您想预定的餐馆名称：");
     String shopName = inString();
+    List<Shop> shops = GetShopDataUtils.shops;
+    for(Shop shop : shops){
+      if(shop.getShopName().equals(shopName)){
+        System.out.println("查询到了餐馆信息，请输入您想要预约的时间：");
+        String time = inString();
+        //调用链表中的算法，添加预约信息
+        orderLinked.addUserReserveMes(id,shopName,time);
+        //连接数据库，将数据写入到userOrder表中
+        String sql = "insert into userOrder(account,name,time)values(?,?,?)";
+        try {
+          connection = JDBCUtils.getConnection();
+          preparedStatement = connection.prepareStatement(sql);
+          preparedStatement.setInt(1,id);
+          preparedStatement.setString(2,shopName);
+          preparedStatement.setString(3,time);
+          preparedStatement.executeUpdate();
+          System.out.println("添加预定成功！");
+
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }finally {
+          try {
+            JDBCUtils.close(resultSet,preparedStatement,connection);
+          } catch (SQLException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -354,28 +399,27 @@ public class ResApplication {
   /**
    * 商家管理员子系统界面显示
    */
-  public static void menuAdmin(){
+  public void menuAdmin(){
     System.out.println("----------------商家登录系统----------------");
     System.out.println("请输入账号：");
     int adminName = inInt();
     System.out.println("请输入密码：");
-    int adminPassword = inInt();
+    long adminPassword = inLong();
     boolean isAdmin = adminLogin(adminName,adminPassword);
     if(isAdmin){
+      //将order信息全部插入到链表中
+      saveOrderData();
       System.out.println("----------------欢迎登录商家管理系统----------------");
-      System.out.println("\t\t\t\t查询餐馆预定（1）");
-      System.out.println("\t\t\t\t查询用户预定（2）");
-      System.out.println("\t\t\t\t处理预定（3）");
+      System.out.println("\t\t\t\t餐馆信息管理（1）");
+      System.out.println("\t\t\t\t餐馆预定信息管理（2）");
       int adminChoice = inInt();
       switch (adminChoice){
         case 1:
-          findResReserve();
+          menuResMesAdm(adminName);
           break;
         case 2:
-          findUserResReserve();
+          menuReserveAdm(adminName);
           break;
-        case 3:
-          disPoseReserve();
       }
     }
   }
@@ -386,27 +430,183 @@ public class ResApplication {
    * @param adminPassword
    * @return
    */
-  public static boolean adminLogin(int adminName,int adminPassword){
-    return true;
+  public static boolean adminLogin(int adminName,long adminPassword){
+    List<Shop> shops = GetShopDataUtils.shops;
+    for(Shop shop : shops){
+      if(Integer.parseInt(shop.getShopId())==adminName&&Integer.parseInt(shop.getShopPassword())==adminPassword){
+        System.out.println("登录成功!");
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 餐馆信息管理界面
+   */
+  public static void menuResMesAdm(int adminId){
+
+    System.out.println("\t\t\t\t查询餐馆信息（1）");
+    System.out.println("\t\t\t\t修改餐馆信息（2）");
+    System.out.println("\t\t\t\t注销餐馆信息（3）");
+
+    System.out.println("请输入您的选择：");
+    int choice = inInt();
+    switch (choice){
+      case 1:
+        SearchResMes(adminId);
+        break;
+      case 2:
+        updateResMes(adminId);
+        break;
+      case 3:
+        deleteResMes(adminId);
+        break;
+    }
+
+  }
+
+  /**
+   * 商家根据登录时的餐馆名称进行查找，显示餐馆自身信息
+   */
+  public static void SearchResMes(int id){
+    List<Shop> shops = GetShopDataUtils.shops;
+    for(Shop shop : shops){
+      if(Integer.parseInt(shop.getShopId())==id){
+        System.out.println(shop);
+        break;
+      }
+    }
+  }
+
+  /**
+   * 商家修改自家店里的餐馆信息，包括（类型、密码、人均消费、地址、电话、特色菜等）
+   * @param id
+   */
+  public static void updateResMes(int id){
+    List<Shop> shops = GetShopDataUtils.shops;
+    for(Shop shop : shops){
+      if(Integer.parseInt(shop.getShopId())==id){
+        System.out.println("请输入您想要修改的信息：");
+        System.out.println("餐馆类型：");
+        String shopType = inString();
+        System.out.println("密码：");
+        String shopPassword = inString();
+        System.out.println("人均消费：");
+        String avgPrice = inString();
+        System.out.println("地址：");
+        String address = inString();
+        System.out.println("电话：");
+        String phone = inString();
+        shop.setShopType(shopType);
+        shop.setShopPassword(shopPassword);
+        shop.setAvgScore(avgPrice);
+        shop.setAddress(address);
+        shop.setPhone(phone);
+        System.out.println("修改信息成功！");
+        break;
+      }
+    }
+  }
+
+  /**
+   * 注销商户信息
+   * @param id
+   */
+  public static void deleteResMes(int id){
+    List<Shop> shops = GetShopDataUtils.shops;
+    for(Shop shop : shops){
+      if(Integer.parseInt(shop.getShopId())==id){
+        shops.remove(shop);
+        System.out.println("注销成功！");
+        break;
+      }
+    }
+  }
+
+
+  /**
+   * 餐馆预定信息管理界面
+   */
+  public void menuReserveAdm(int id){
+    System.out.println("\t\t\t\t查询餐馆所有预定(1)");
+    System.out.println("\t\t\t\t查询某用户预定(2)");
+    System.out.println("\t\t\t\t处理预定(3)");
+    int choice = inInt();
+    switch (choice){
+      case 1:
+        findResReserve(id);
+        break;
+      case 2:
+        findUserResReserve(id);
+        break;
+      case 3:
+        dealWithReserve(id);
+        break;
+    }
   }
 
   /**
    * 商家查询餐馆预定
    */
-  public static void findResReserve(){
-
-  }
-
-  public static void findUserResReserve(){
-
+  public void findResReserve(int adminId){
+    List<Shop> shops = GetShopDataUtils.shops;
+    String shopName = null;
+    for(Shop shop : shops){
+      if(Integer.parseInt(shop.getShopId())==adminId){
+        shopName = shop.getShopName();
+        break;
+      }
+    }
+    orderLinked.viewMesByName(shopName);
   }
 
   /**
-   * 商家处理预定
+   * 商家查询某个用户的预定情况
+   * 通过输入用户名称，查询该用户预定的该餐馆信息
+   * @param adminId
    */
-  public static void disPoseReserve(){
-
+  public void findUserResReserve(int adminId){
+    System.out.println("请输入您想要查询的用户id：");
+    int userId = inInt();
+    List<Shop> shops = GetShopDataUtils.shops;
+    for(Shop shop : shops){
+      if(Integer.parseInt(shop.getShopId())==adminId){
+        //查询该用户在该餐馆的预定
+        orderLinked.viewUserReserveTime(userId,shop.getShopName());
+        break;
+      }
+    }
   }
+
+  /**
+   * 处理预定信息
+   * 商家根据用户预定该餐馆的先后顺序来处理预定，处理后的预定直接删除。
+   * 通过输入待处理预定的个数n，将目前排在前面的前n条预定信息从order表中删除。
+   * @param adminId
+   */
+  public void dealWithReserve(int adminId){
+    System.out.println("请输入您想要处理的预定个数：");
+    int n = inInt();
+    //连接数据库，将order表中查询到的前n条数据删除
+    try {
+      String sql = "delete from userOrder where name = ? and limit = ?";
+      connection = JDBCUtils.getConnection();
+      preparedStatement = connection.prepareStatement(sql);
+      preparedStatement.executeUpdate();
+      System.out.println("处理预定成功！");
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }finally {
+      try {
+        JDBCUtils.close(resultSet,preparedStatement,connection);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+
 
   /**
    * 在控制台输入一个数字，并将这个数字返回
