@@ -330,17 +330,18 @@ public class ResApplication {
   /**
    * 通过输入餐馆的名称，查询该用户在该餐馆的预定信息
    */
-  public static void userFindResReserve(int id){
+  public void userFindResReserve(int id){
     System.out.println("请输入您想要查询的餐馆名称：");
     String shopName = inString();
-    
+    orderLinked.viewUserReserveTime(id,shopName);
   }
 
   /**
-   * 用户添加餐馆预定
+   * 输入餐馆的名称，如果餐馆在shop文件中存在，那么增加一条新的预定信息到order表中。
    */
   public static void addReserve(int id){
-
+    System.out.println("请输入您想预定的餐馆名称：");
+    String shopName = inString();
   }
 
   /**

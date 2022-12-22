@@ -57,6 +57,21 @@ public class OrderLinked {
     }
   }
 
+  /**
+   * 根据用户的id和输入的餐馆名称，查询预约的餐馆的时间
+   * @param id
+   * @param shopName
+   */
+  public void viewUserReserveTime(int id,String shopName){
+     OrderNode cur = head;
+     for(int i=0;i<size;i++){
+       if(cur.userId==id&&cur.shopName.equals(shopName)){
+         System.out.println("用户在该餐馆预约的时间为："+cur.time);
+       }
+       cur = cur.next;
+     }
+  }
+
 
   //内部类节点对象
   class OrderNode{
