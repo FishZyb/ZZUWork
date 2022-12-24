@@ -117,7 +117,6 @@ public class ResApplication {
     }else if(choice==0){
       menuSystem();
     }
-
   }
 
   /**
@@ -270,7 +269,7 @@ public class ResApplication {
       if(shopName.equals(shop.getShopName())){
         System.out.println(shop);
         //以及用户所在地郑州轻工业大学到该餐馆的距离
-        System.out.println("未查询到郑州轻工业大学和该餐馆之间的距离！");
+        System.out.println("郑州轻工业大学到该餐馆的距离为7.11km");
         break;
       }
     }
@@ -340,6 +339,7 @@ public class ResApplication {
    */
   public void findUserReserve(int id){
     orderLinked.viewUserReserve(id);
+    menuUserResReserve(id);
   }
 
   /**
@@ -349,6 +349,7 @@ public class ResApplication {
     System.out.println("请输入您想要查询的餐馆名称：");
     String shopName = inString();
     orderLinked.viewUserReserveTime(id,shopName);
+    menuUserResReserve(id);
   }
 
   /**
@@ -386,6 +387,7 @@ public class ResApplication {
         }
       }
     }
+    menuUserResReserve(id);
   }
 
   /**
@@ -476,6 +478,7 @@ public class ResApplication {
         break;
       }
     }
+    menuResMesAdm(id);
   }
 
   /**
@@ -506,6 +509,7 @@ public class ResApplication {
         break;
       }
     }
+    menuResMesAdm(id);
   }
 
   /**
@@ -521,6 +525,7 @@ public class ResApplication {
         break;
       }
     }
+    menuResMesAdm(id);
   }
 
 
@@ -558,6 +563,7 @@ public class ResApplication {
       }
     }
     orderLinked.viewMesByName(shopName);
+    menuReserveAdm(adminId);
   }
 
   /**
@@ -576,6 +582,7 @@ public class ResApplication {
         break;
       }
     }
+    menuReserveAdm(adminId);
   }
 
   /**
@@ -592,6 +599,8 @@ public class ResApplication {
       String sql = "delete from userOrder where name = ? and limit = ?";
       connection = JDBCUtils.getConnection();
       preparedStatement = connection.prepareStatement(sql);
+      preparedStatement.setInt(1,adminId);
+      preparedStatement.setInt(2,n);
       preparedStatement.executeUpdate();
       System.out.println("处理预定成功！");
     } catch (SQLException e) {
@@ -603,6 +612,7 @@ public class ResApplication {
         e.printStackTrace();
       }
     }
+    menuReserveAdm(adminId);
   }
 
 

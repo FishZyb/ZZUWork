@@ -93,9 +93,6 @@ public class OrderLinked {
       if(cur.shopName.equals(shopName)){
         System.out.println("用户名："+cur.userId+"在"+cur.time+"预定了该餐馆");
       }
-      if(i == size-1){
-        System.out.println("该餐馆没有被预定!");
-      }
     }
   }
 
